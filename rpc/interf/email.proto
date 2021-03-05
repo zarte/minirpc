@@ -1,0 +1,26 @@
+syntax = "proto3";
+  
+// user 包
+package rpc;
+ 
+// 指定 go 的包路径及包名
+// option go_package="minirpc/rpc";
+// 指定 php 的命名空间
+// option php_namespace="App\\Services";
+ 
+// User 服务及服务接口的定义
+service Emailer {
+    rpc SendMail(SendRequest) returns (SendResponse) {}
+}
+
+// User 服务的各个接口的请求/响应结构
+message SendRequest {
+    string touser = 1;
+    string title = 2;
+    string content = 3;
+}
+ 
+message SendResponse {
+    int64 err = 1;
+    string msg = 2;
+}
