@@ -3,6 +3,7 @@ send email service. 发送邮件微服务程序
 
 ## 运行
 go run emailserver.go -euser xxx -epasswd xxxx   
+go run emailserver.go -euser 897882884@qq.com -epasswd kjlzoaastaizbbij
 默认rpc端口1234 
 ## 参数说明  
 consul: consul服务发现注册地址,示例127.0.0.1:8500  

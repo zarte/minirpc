@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
 	"github.com/zarte/comutil/Goconfig"
+	"minirpc/client/stockalarm/utils"
 	"minirpc/rpc/service"
 	"os"
 	"strconv"
@@ -26,7 +27,14 @@ func main()  {
 		fmt.Println(err)
 		return
 	}
-	ydaylist,err := Model.GgdayList(time.Now().AddDate(0,0,-1).Format("20060102"))
+	nowweek := int(time.Now().Weekday())
+	var ydaylist []Model.Ggdaydetail
+	if nowweek== 1 {
+		ydaylist,err = Model.GgdayList(time.Now().AddDate(0,0,-3).Format("20060102"))
+	}else{
+		ydaylist,err = Model.GgdayList(time.Now().AddDate(0,0,-1).Format("20060102"))
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -42,16 +50,29 @@ func main()  {
 				newflag = false
 				val :=item.Per-yitem.Per
 				if val>=config.Gconfig.Alarmper {
+					//获取最近情况
+					var otherstr string
+					stockinfo := utils.GetStockBaseInfo(item.Code,item.Name)
+					if stockinfo.Name != ""{
+						//抓取
+						otherstr = utils.StockAnaly(stockinfo.Code)
+					}
 					insCode = append(insCode,strockInfo{
 						Code :item.Code,
 						Name :item.Name,
-						Msg :strconv.FormatFloat(val,'f',2,64),
+						Msg :strconv.FormatFloat(item.Per,'f',2,64) +"% +" +strconv.FormatFloat(val,'f',2,64)+"% "+ otherstr,
 					})
 				} else if val<=-config.Gconfig.Alarmper {
+					var otherstr string
+					stockinfo := utils.GetStockBaseInfo(item.Code,item.Name)
+					if stockinfo.Name != ""{
+						//抓取
+						otherstr = utils.StockAnaly(stockinfo.Code)
+					}
 					desCode = append(desCode,strockInfo{
 						Code :item.Code,
 						Name :item.Name,
-						Msg :strconv.FormatFloat(val,'f',2,64),
+						Msg :strconv.FormatFloat(item.Per,'f',2,64) +"% " +strconv.FormatFloat(val,'f',2,64)+"% "+ otherstr,
 					})
 				}
 				break
@@ -66,20 +87,47 @@ func main()  {
 		}
 	}
 
+	if len(insCode)>100{
+		insCode = []strockInfo{
+			strockInfo{
+				Code :"111",
+				Name :"sss",
+				Msg :"超过100",
+			},
+		}
+	}
+	if len(desCode)>100{
+		desCode = []strockInfo{
+			strockInfo{
+				Code :"111",
+				Name :"sss",
+				Msg :"超过100",
+			},
+		}
+	}
+	if len(newCode)>100{
+		newCode = []strockInfo{
+			strockInfo{
+				Code :"111",
+				Name :"sss",
+				Msg :"超过100",
+			},
+		}
+	}
 	if len(insCode)>0 ||len(desCode)>0 ||len(newCode)>0 {
 		//生成邮件内容
 		var mailcontent string
 		mailcontent += "增持:<br/>"
 		for _,item := range insCode{
-			mailcontent += item.Code+"-"+item.Name+"-"+item.Msg+"<br/>"
+			mailcontent += item.Name+"("+item.Code+")"+" "+item.Msg+"<br/>"
 		}
 		mailcontent += "减持:<br/>"
 		for _,item := range desCode{
-			mailcontent += item.Code+"-"+item.Name+"-"+item.Msg+"<br/>"
+			mailcontent +=  item.Name+"("+item.Code+")"+" "+item.Msg+"<br/>"
 		}
 		mailcontent += "新增:<br/>"
 		for _,item := range newCode{
-			mailcontent += item.Code+"-"+item.Name+"<br/>"
+			mailcontent +=  item.Name+"("+item.Code+")"+"<br/>"
 		}
 		fmt.Println(mailcontent)
 		sendAlarm(mailcontent)
@@ -132,6 +180,7 @@ func  sendAlarm(content string)  {
 	})
 	if err != nil {
 		fmt.Println("error Consul: %v", err)
+		return
 	}
 	lastIndex = metainfo.LastIndex
 

@@ -15,4 +15,4 @@ require (
 	xorm.io/xorm v1.0.7
 )
 
-replace github.com/zarte/comutil => E:\MyGo\comutil
+replace github.com/zarte/comutil => E:\Go\comutil

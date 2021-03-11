@@ -1,13 +1,13 @@
 package service
 
 import (
-	"fmt"
-	"log"
-	rpc "minirpc/rpc/interf"
-	"google.golang.org/grpc"
-	"time"
 	"context"
 	"errors"
+	"fmt"
+	"google.golang.org/grpc"
+	"log"
+	rpc "minirpc/rpc/interf"
+	"time"
 )
 
 type EmailContent struct {
@@ -34,15 +34,17 @@ func Sendmail(host string,port string, content EmailContent) error  {
 	})
 
 	if err != nil {
-		log.Printf("send fail: %v", err)
+		log.Printf(host +":"+"send fail: %v", err)
+		return errors.New("send fail")
 	}
 
 	if 0 == res.Err {
 		fmt.Println("发送成功")
-		fmt.Println(res.Msg)
+		fmt.Println(host +":"+res.Msg)
 		return nil
 	} else {
-		return errors.New("res.Msg")
+		fmt.Println(res.Err)
+		return errors.New("res.Err")
 	}
 
 }

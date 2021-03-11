@@ -54,7 +54,7 @@ func testsendmail(host string,port string)  {
 	defer cancel()
 	//UserIndex 请求
 	res, err := emailerClient.SendMail(ctx, &rpc.SendRequest{
-		Touser:     "",
+		Touser:     "285568281@qq.com",
 		Title: "测试标题",
 		Content: "测试内容",
 	})

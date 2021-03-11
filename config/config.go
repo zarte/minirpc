@@ -14,6 +14,7 @@ type Sysconfig struct {
 	DbPrefix string
 	Emaillist string
 	CurExePath string
+	Nowdaystr string
 	Alarmper float64
 	GLoger *Zloger.Loger
 }
